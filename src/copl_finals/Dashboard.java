@@ -54,6 +54,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jPanel4 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         canvas1 = new java.awt.Canvas();
+        jPanel7 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
@@ -78,6 +79,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setFont(new java.awt.Font("Segoe UI Black", 1, 18)); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(1075, 586));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jLabel4.setText("Schedule of Withdrawal");
@@ -99,6 +101,19 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jLabel5.setFont(new java.awt.Font("Segoe UI Black", 1, 36)); // NOI18N
         jLabel5.setText("Dashboard");
 
+        jPanel7.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 281, Short.MAX_VALUE)
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -113,12 +128,14 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(404, 404, 404)
                         .addComponent(canvas1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(858, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(604, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addGap(16, 16, 16)
                     .addComponent(jLabel5)
-                    .addContainerGap(1162, Short.MAX_VALUE)))
+                    .addContainerGap(1197, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -130,6 +147,9 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
                 .addGap(145, 145, 145)
                 .addComponent(canvas1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(215, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel1Layout.createSequentialGroup()
                     .addGap(16, 16, 16)
@@ -236,7 +256,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(562, Short.MAX_VALUE))
+                .addContainerGap(597, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -263,7 +283,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton1.setBackground(new java.awt.Color(8, 124, 28));
         jButton1.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/copl_finals/icons8-loading-circle-25.png"))); // NOI18N
         jButton1.setText("Home");
         jButton1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -276,7 +296,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton7.setBackground(new java.awt.Color(8, 124, 28));
         jButton7.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton7.setForeground(new java.awt.Color(159, 148, 157));
-        jButton7.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton7.setText("Logout");
         jButton7.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -289,11 +308,8 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton8.setBackground(new java.awt.Color(8, 124, 28));
         jButton8.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton8.setForeground(new java.awt.Color(159, 148, 157));
-        jButton8.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton8.setText("Wallet");
         jButton8.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        jButton8.setDisabledIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
-        jButton8.setDisabledSelectedIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -304,7 +320,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton9.setBackground(new java.awt.Color(8, 124, 28));
         jButton9.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton9.setForeground(new java.awt.Color(159, 148, 157));
-        jButton9.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton9.setText("Manage Savings");
         jButton9.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton9.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -317,7 +332,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton10.setBackground(new java.awt.Color(8, 124, 28));
         jButton10.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton10.setForeground(new java.awt.Color(159, 148, 157));
-        jButton10.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton10.setText("History");
         jButton10.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton10.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -330,7 +344,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton11.setBackground(new java.awt.Color(8, 124, 28));
         jButton11.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton11.setForeground(new java.awt.Color(159, 148, 157));
-        jButton11.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton11.setText("Profile");
         jButton11.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton11.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -340,7 +353,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
             }
         });
 
-        jLabel3.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\PEBANK.png")); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/copl_finals/PEBANK.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -452,6 +465,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JTabbedPane jTabbedPane2;
     // End of variables declaration//GEN-END:variables
 }

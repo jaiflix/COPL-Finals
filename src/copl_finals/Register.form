@@ -52,10 +52,8 @@
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Group type="103" alignment="1" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jTextField2" alignment="1" pref="306" max="32767" attributes="0"/>
-                              <Component id="jTextField4" alignment="0" max="32767" attributes="0"/>
-                          </Group>
+                          <Component id="jTextField2" alignment="1" pref="306" max="32767" attributes="0"/>
+                          <Component id="jTextField4" alignment="0" max="32767" attributes="0"/>
                           <Component id="jTextField6" alignment="0" pref="306" max="32767" attributes="0"/>
                           <Component id="jTextField8" alignment="0" pref="306" max="32767" attributes="0"/>
                           <Component id="btnCreate" alignment="1" min="-2" pref="215" max="-2" attributes="0"/>

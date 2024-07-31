@@ -79,6 +79,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setFont(new java.awt.Font("Segoe UI Black", 1, 18)); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(1075, 586));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jLabel4.setText("Schedule of Withdrawal");
@@ -295,7 +296,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton7.setBackground(new java.awt.Color(8, 124, 28));
         jButton7.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton7.setForeground(new java.awt.Color(159, 148, 157));
-        jButton7.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton7.setText("Logout");
         jButton7.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -308,11 +308,8 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton8.setBackground(new java.awt.Color(8, 124, 28));
         jButton8.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton8.setForeground(new java.awt.Color(159, 148, 157));
-        jButton8.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton8.setText("Wallet");
         jButton8.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        jButton8.setDisabledIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
-        jButton8.setDisabledSelectedIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -323,7 +320,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton9.setBackground(new java.awt.Color(8, 124, 28));
         jButton9.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton9.setForeground(new java.awt.Color(159, 148, 157));
-        jButton9.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton9.setText("Manage Savings");
         jButton9.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton9.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -336,7 +332,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton10.setBackground(new java.awt.Color(8, 124, 28));
         jButton10.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton10.setForeground(new java.awt.Color(159, 148, 157));
-        jButton10.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton10.setText("History");
         jButton10.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton10.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -349,7 +344,6 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jButton11.setBackground(new java.awt.Color(8, 124, 28));
         jButton11.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jButton11.setForeground(new java.awt.Color(159, 148, 157));
-        jButton11.setIcon(new javax.swing.ImageIcon("C:\\Users\\aamal\\Downloads\\icons8-loading-circle-25.png")); // NOI18N
         jButton11.setText("Profile");
         jButton11.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton11.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);

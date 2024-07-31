@@ -4,8 +4,13 @@
  */
 package copl_finals;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -24,7 +29,7 @@ import java.time.format.DateTimeParseException;
  * @author Admin
  */
 public class Register extends javax.swing.JFrame {
-
+    
     private Connection getConnection() throws SQLException {
         // Implement this method to get your database connection
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/copl_finals", "root", "pass0403");
@@ -115,6 +120,7 @@ public class Register extends javax.swing.JFrame {
         String insertUserDetailsQuery = "INSERT INTO tb_userdetails (accountnumber, username, firstname, lastname, email, phonenumber, birthdate, age, gender, nationality, password, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String getUserIdQuery = "SELECT userid FROM tb_users WHERE accountnumber = ?";
         String insertLogQuery = "INSERT INTO tb_userlogs (userid, username, details) VALUES (?, ?, ?)";
+        String insertBalanceQuery = "INSERT INTO tb_userbalance (userid, accountnumber, username, balance) VALUES (?, ?, ?, ?)";
         
         try (Connection connection = getConnection()) {
             // Check for existing username, email, or phone number
@@ -182,6 +188,14 @@ public class Register extends javax.swing.JFrame {
                 insertLogStatement.executeUpdate();
             }
             
+            try (PreparedStatement insertBalanceStatement = connection.prepareStatement(insertBalanceQuery)) {
+                insertBalanceStatement.setInt(1, userId);
+                insertBalanceStatement.setString(2, accountNumber);
+                insertBalanceStatement.setString(3, username);
+                insertBalanceStatement.setInt(4, 0);
+                insertBalanceStatement.executeUpdate();
+            }
+            
             JOptionPane.showMessageDialog(this, "Signup successful! Your Account Number is: "+accountNumber+"", 
             "Success", JOptionPane.INFORMATION_MESSAGE);
             dispose();
@@ -194,12 +208,23 @@ public class Register extends javax.swing.JFrame {
     }
     
     public Register() {
-        initComponents();
+        myinitComponents();
         setLocationRelativeTo(null);
+        scaleImageToLabel(jLabel14);
+        jLabel13.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         btnCreate.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 signup();
+            }
+        });
+        
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                SwingUtilities.invokeLater(() -> new Login().setVisible(true));
+                dispose();
             }
         });
     }
@@ -265,7 +290,7 @@ public class Register extends javax.swing.JFrame {
 
         jLabel5.setText("Phone Number");
 
-        jLabel6.setText("Birth Date");
+        jLabel6.setText("Birth Date (Ex: \"YYYY-MM-DD\")");
 
         jLabel7.setText("Gender");
 
@@ -292,6 +317,11 @@ public class Register extends javax.swing.JFrame {
         jLabel12.setText("Already have an account?");
 
         jLabel13.setText("Login");
+        jLabel13.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel13MouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -393,10 +423,211 @@ public class Register extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    private void myinitComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        jLabel14 = new javax.swing.JLabel();
+        jTextField2 = new Login.RoundedTextField(20, 15);
+        jTextField1 = new Login.RoundedTextField(20, 15);
+        jTextField3 = new Login.RoundedTextField(20, 15);
+        jTextField4 = new Login.RoundedTextField(20, 15);
+        jTextField5 = new Login.RoundedTextField(20, 15);
+        jTextField6 = new Login.RoundedTextField(20, 15);
+        jTextField7 = new Login.RoundedTextField(20, 15);
+        jTextField8 = new Login.RoundedTextField(20, 15);
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        btnCreate =new Login.RoundedButton(20, 15);
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jPasswordField1 = new Login.RoundedPasswordField(20, 15);
+        jPasswordField2 = new Login.RoundedPasswordField(20, 15);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(255, 255, 255));
+        setPreferredSize(new java.awt.Dimension(968, 670));
+
+        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/copl_finals/PEBankBGRegister.png"))); // NOI18N
+        jLabel14.setMaximumSize(new java.awt.Dimension(294, 670));
+        jLabel14.setMinimumSize(new java.awt.Dimension(294, 670));
+        jLabel14.setPreferredSize(new java.awt.Dimension(294, 670));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+
+        jLabel1.setText("First Name");
+
+        jLabel2.setText("Last Name");
+
+        jLabel3.setText("Username");
+
+        jLabel4.setText("Email");
+
+        jLabel5.setText("Phone Number");
+
+        jLabel6.setText("Birth Date (Ex: \"YYYY-MM-DD\")");
+
+        jLabel7.setText("Gender");
+
+        jLabel8.setText("Nationality");
+
+        jLabel9.setText("Password");
+
+        jLabel10.setText("Confirm Password");
+
+        jLabel11.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel11.setText("REGISTER");
+
+        btnCreate.setBackground(new java.awt.Color(0, 204, 51));
+        btnCreate.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        btnCreate.setForeground(new java.awt.Color(255, 255, 255));
+        btnCreate.setText("Create Account");
+        btnCreate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("Already have an account?");
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
+        jLabel13.setText("<html><u>Login</u><html>");
+        jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
+        jLabel13.setForeground(Color.BLUE);
+        jLabel13.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel13MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(jTextField5)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(jTextField7, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel9)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel13))
+                            .addComponent(jPasswordField1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jTextField2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                                .addComponent(jTextField4))
+                            .addComponent(jTextField6, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(btnCreate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel10)
+                            .addComponent(jPasswordField2))
+                        .addGap(31, 31, 31))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(314, 314, 314)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addComponent(jLabel11)
+                .addGap(27, 27, 27)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
+                    .addGap(8, 8, 8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel6))
+                    .addGap(8, 8, 8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel10))
+                    .addGap(8, 8, 8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+                    .addComponent(jPasswordField2))
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCreate, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12)
+                    .addComponent(jLabel13))
+                .addContainerGap(39, Short.MAX_VALUE))
+        );
+
+        pack();
+    }
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCreateActionPerformed
+
+    private void jLabel13MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel13MouseClicked
+        this.dispose();
+        SwingUtilities.invokeLater(() -> new Login().setVisible(true));
+    }//GEN-LAST:event_jLabel13MouseClicked
 
     /**
      * @param args the command line arguments
@@ -432,7 +663,14 @@ public class Register extends javax.swing.JFrame {
             }
         });
     }
-
+    private void scaleImageToLabel(JLabel label) {
+        ImageIcon icon = (ImageIcon) label.getIcon();
+        if (icon != null) {
+            Image originalImage = icon.getImage();
+            Image scaledImage = originalImage.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+            label.setIcon(new ImageIcon(scaledImage));
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
     private javax.swing.JLabel jLabel1;

@@ -133,14 +133,21 @@ public class Login extends javax.swing.JFrame {
         scaleImageToLabel(jLabel1);
         jLabel5.setCursor(new Cursor(Cursor.HAND_CURSOR));
         jLabel3.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                int confirmed = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
+                int confirmed = JOptionPane.showConfirmDialog(
+                    Login.this, // Parent component
+                    "Are you sure you want to exit?",
+                    "Exit Confirmation",
+                    JOptionPane.YES_NO_OPTION
+                );
                 if (confirmed == JOptionPane.YES_OPTION) {
-                    dispose();
+                    dispose(); // Close the current window
                 }
+                // If NO_OPTION, do nothing (the window remains open)
             }
         });
         
@@ -455,6 +462,7 @@ private void myinitComponents() {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jLabel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel5MouseClicked
+        this.dispose();
         SwingUtilities.invokeLater(() -> new Register().setVisible(true));
     }//GEN-LAST:event_jLabel5MouseClicked
 

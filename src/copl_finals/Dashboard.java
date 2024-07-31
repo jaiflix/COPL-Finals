@@ -15,6 +15,7 @@ public class Dashboard extends javax.swing.JFrame {
      */
     public Dashboard() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -75,6 +76,7 @@ private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
         jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(1075, 586));
         setSize(new java.awt.Dimension(1075, 586));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 

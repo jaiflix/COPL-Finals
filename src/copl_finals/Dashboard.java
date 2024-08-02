@@ -9,21 +9,60 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.table.DefaultTableModel;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.DocumentFilter.FilterBypass;
+import javax.swing.text.PlainDocument;
+
 
 /**
  *
  * @author Admin
  */
-public class Dashboard extends javax.swing.JFrame {
 
+public class Dashboard extends javax.swing.JFrame {
+    
     private JButton lastClickedButton = null;
     
     public Dashboard() {
         initComponents();
+        applyNumberFilter(txtAmountWD);
+        applyNumberFilter(txtAmountWW);
+
+        // Ensure USERNAME is set before using DatabaseAccess
+        if (Login.USERNAME != null && !Login.USERNAME.isEmpty()) {
+            // Create DatabaseAccess instance with the username
+            DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+            dbAccess.retrieveUserData();
+            lblBalanceD.setText(String.format("%.2f", dbAccess.getBalance()));
+            lblBalanceW.setText(String.format("%.2f", dbAccess.getBalance()));
+            updateTransactionTable();
+            updateWithdrawalTable();
+            updateDepositTable();
+        } else {
+            lblBalanceD.setText("Username not set.");
+        }
+        
         setLocationRelativeTo(null);
+
+
         int initialTabIndex = 4; // Index of the tab you want to show first (0-based index)
         jTabbedPane2.setSelectedIndex(initialTabIndex);
         btnHome.setForeground(Color.WHITE);
@@ -51,7 +90,184 @@ public class Dashboard extends javax.swing.JFrame {
         configureButton(btnManageSavings, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorManageSavings);
         configureButton(btnHistory, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorHistory);
         configureButton(btnProfile, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorProfile);
+    }   
+    
+        private static void applyNumberFilter(JTextField textField) {
+        PlainDocument doc = (PlainDocument) textField.getDocument();
+        doc.setDocumentFilter(new NumberDocumentFilter());
     }
+
+    private static class NumberDocumentFilter extends DocumentFilter {
+        private static final String DECIMAL_REGEX = "\\d*\\.?\\d{0,2}";
+
+        @Override
+        public void insertString(FilterBypass fb, int offs, String str, AttributeSet attr) throws BadLocationException {
+            String newText = getNewText(fb, offs, str);
+            if (newText.matches(DECIMAL_REGEX) && isValidInput(newText)) {
+                super.insertString(fb, offs, str, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet attr) throws BadLocationException {
+            String newText = getNewText(fb, offs, str);
+            if (newText.matches(DECIMAL_REGEX) && isValidInput(newText)) {
+                super.replace(fb, offs, length, str, attr);
+            }
+        }
+
+        @Override
+        public void remove(FilterBypass fb, int offs, int length) throws BadLocationException {
+            super.remove(fb, offs, length);
+        }
+
+        private String getNewText(FilterBypass fb, int offs, String str) throws BadLocationException {
+            String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
+            StringBuilder sb = new StringBuilder(currentText);
+            sb.replace(offs, offs + str.length(), str);
+            return sb.toString();
+        }
+
+        private boolean isValidInput(String text) {
+            // Check if the first character is zero
+            return text.length() == 0 || text.charAt(0) != '0';
+        }
+    }
+    
+    private void updateTransactionTable() {
+            DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+            dbAccess.retrieveUserData(); // Retrieve user data including transactions
+
+            List<DatabaseAccess.Transaction> transactions = dbAccess.getTransactions();
+            transactions.sort((t1, t2) -> t2.getTransferDate().compareTo(t1.getTransferDate())); // Sort in descending order
+
+            // Limit to the latest 5 transactions
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setColumnIdentifiers(new Object[] {
+            "Transaction", "Account", "Amount", "Date"
+             });
+            model.setRowCount(0); // Clear existing rows
+
+            for (int i = 0; i < Math.min(5, transactions.size()); i++) {
+                DatabaseAccess.Transaction txn = transactions.get(i);
+                model.addRow(new Object[] {
+                    txn.getTransacType(),
+                    txn.getTransacAccount(),
+                    txn.getAmount(),
+                    txn.getTransferDate()
+                });
+            }
+            Map<String, Double> totals = calculateTransactionTotals(transactions);
+            displayTransactionTotals(totals);
+            jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+    }
+    
+    private void updateWithdrawalTable() {
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData(); // Retrieve user data including transactions
+
+        List<DatabaseAccess.Transaction> transactions = dbAccess.getTransactions();
+        
+        // Filter for withdrawals
+        List<DatabaseAccess.Transaction> withdrawals = new ArrayList<>();
+        for (DatabaseAccess.Transaction txn : transactions) {
+            if ("Withdraw".equals(txn.getTransacType())) {
+                withdrawals.add(txn);
+            }
+        }
+
+        // Sort withdrawals by transfer date in descending order
+        withdrawals.sort((t1, t2) -> t2.getTransferDate().compareTo(t1.getTransferDate()));
+
+        // Limit to the latest 5 withdrawals
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        model.setColumnIdentifiers(new Object[] {
+            "Account", "Amount", "Date"
+        });
+        model.setRowCount(0); // Clear existing rows
+
+        for (int i = 0; i < Math.min(5, withdrawals.size()); i++) {
+            DatabaseAccess.Transaction txn = withdrawals.get(i);
+            model.addRow(new Object[] {
+                txn.getTransacAccount(),
+                txn.getAmount(),
+                txn.getTransferDate()
+            });
+        }
+        // Adjust column widths to fit content
+        jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+}
+    
+    private void updateDepositTable() {
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData(); // Retrieve user data including transactions
+
+        List<DatabaseAccess.Transaction> transactions = dbAccess.getTransactions();
+        
+        // Filter for withdrawals
+        List<DatabaseAccess.Transaction> withdrawals = new ArrayList<>();
+        for (DatabaseAccess.Transaction txn : transactions) {
+            if ("Deposit".equals(txn.getTransacType())) {
+                withdrawals.add(txn);
+            }
+        }
+
+        // Sort withdrawals by transfer date in descending order
+        withdrawals.sort((t1, t2) -> t2.getTransferDate().compareTo(t1.getTransferDate()));
+
+        // Limit to the latest 5 withdrawals
+        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+        model.setColumnIdentifiers(new Object[] {
+            "Account", "Amount", "Date"
+        });
+        model.setRowCount(0); // Clear existing rows
+
+        for (int i = 0; i < Math.min(5, withdrawals.size()); i++) {
+            DatabaseAccess.Transaction txn = withdrawals.get(i);
+            model.addRow(new Object[] {
+                txn.getTransacAccount(),
+                txn.getAmount(),
+                txn.getTransferDate()
+            });
+        }
+        // Adjust column widths to fit content
+        jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+}
+
+    
+    private Map<String, Double> calculateTransactionTotals(List<DatabaseAccess.Transaction> transactions) {
+        Map<String, Double> totals = new HashMap<>();
+        for (DatabaseAccess.Transaction txn : transactions) {
+            String type = txn.getTransacType();
+            Double amount = Double.parseDouble(txn.getAmount());
+            if (totals.containsKey(type)) {
+                totals.put(type, totals.get(type) + amount);
+            } else {
+                totals.put(type, amount);
+            }
+        }
+        return totals;
+    }
+    
+    private void displayTransactionTotals(Map<String, Double> totals) {
+    // Set default values if totals are not available
+    double totalWithdrawal = totals.getOrDefault("Withdraw", 0.0);
+    double totalDeposit = totals.getOrDefault("Deposit", 0.0);
+    double totalSend = totals.getOrDefault("Send", 0.0);
+    double totalReceive = totals.getOrDefault("Receive", 0.0);
+
+    // Calculate total money spent and received
+    double totalMoneySpent = totalSend;
+    double totalMoneyReceived = totalReceive;
+
+    // Update labels with the totals
+    lblTotalWithdrawal.setText(String.format("%.2f", totalWithdrawal));
+    lblTotalDeposit.setText(String.format("%.2f", totalDeposit));
+    lblTotalSpent.setText(String.format("%.2f", totalMoneySpent));
+    lblTotalReceived.setText(String.format("%.2f", totalMoneyReceived));
+}
+
+
 
      private void configureButton(JButton button, Color customColor, Color hoverColor, Color clickedColor, Color unclickedColor, JLabel indicator) {
         button.setFocusPainted(false);
@@ -130,7 +346,7 @@ public class Dashboard extends javax.swing.JFrame {
         lblBalanceW = new javax.swing.JLabel();
         jTabbedPane3 = new javax.swing.JTabbedPane();
         pnlDepositW = new javax.swing.JPanel();
-        cmbxDepositTo = new javax.swing.JComboBox<>();
+        cmbxDepositFrom = new javax.swing.JComboBox<>();
         jLabel40 = new javax.swing.JLabel();
         rbPmoneyD = new javax.swing.JRadioButton();
         rbEmoneyD = new javax.swing.JRadioButton();
@@ -140,7 +356,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel19 = new javax.swing.JLabel();
         jPanel15 = new javax.swing.JPanel();
         pnlWithdrawW = new javax.swing.JPanel();
-        cmbxWithdrawFrom = new javax.swing.JComboBox<>();
+        cmbxWithdrawTo = new javax.swing.JComboBox<>();
         jLabel47 = new javax.swing.JLabel();
         rbPmoneyW = new javax.swing.JRadioButton();
         rbEmoneyW = new javax.swing.JRadioButton();
@@ -291,11 +507,11 @@ public class Dashboard extends javax.swing.JFrame {
         pnlDepositW.setBackground(new java.awt.Color(200, 252, 180));
         pnlDepositW.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        cmbxDepositTo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        pnlDepositW.add(cmbxDepositTo, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 42, 812, 47));
+        cmbxDepositFrom.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Mode of Transaction...", "GCASH", "7-Eleven Physical Store", "Paymaya", "From Other Bank" }));
+        pnlDepositW.add(cmbxDepositFrom, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 42, 812, 47));
 
         jLabel40.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel40.setText("Deposit to:");
+        jLabel40.setText("Deposit from:");
         pnlDepositW.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
 
         rbPmoneyD.setBackground(new java.awt.Color(200, 252, 180));
@@ -322,9 +538,12 @@ public class Dashboard extends javax.swing.JFrame {
         btnConfirmWD.setForeground(new java.awt.Color(255, 255, 255));
         btnConfirmWD.setText("Confirm");
         btnConfirmWD.setBorder(null);
+        btnConfirmWD.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmWDActionPerformed(evt);
+            }
+        });
         pnlDepositW.add(btnConfirmWD, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 235, 224, 48));
-
-        txtAmountWD.setText("jTextField3");
         pnlDepositW.add(txtAmountWD, new org.netbeans.lib.awtextra.AbsoluteConstraints(55, 170, 777, 47));
 
         jLabel19.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -338,11 +557,11 @@ public class Dashboard extends javax.swing.JFrame {
         pnlWithdrawW.setBackground(new java.awt.Color(200, 252, 180));
         pnlWithdrawW.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        cmbxWithdrawFrom.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        pnlWithdrawW.add(cmbxWithdrawFrom, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 42, 812, 47));
+        cmbxWithdrawTo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Mode of Transaction...", "GCASH", "Paymaya", "ATM" }));
+        pnlWithdrawW.add(cmbxWithdrawTo, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 42, 812, 47));
 
         jLabel47.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel47.setText("Withdraw from:");
+        jLabel47.setText("Withdraw to:");
         pnlWithdrawW.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
 
         rbPmoneyW.setBackground(new java.awt.Color(200, 252, 180));
@@ -369,9 +588,12 @@ public class Dashboard extends javax.swing.JFrame {
         btnConfirmWW.setForeground(new java.awt.Color(255, 255, 255));
         btnConfirmWW.setText("Confirm");
         btnConfirmWW.setBorder(null);
+        btnConfirmWW.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmWWActionPerformed(evt);
+            }
+        });
         pnlWithdrawW.add(btnConfirmWW, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 235, 224, 48));
-
-        txtAmountWW.setText("jTextField3");
         pnlWithdrawW.add(txtAmountWW, new org.netbeans.lib.awtextra.AbsoluteConstraints(55, 170, 777, 47));
 
         jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -796,7 +1018,6 @@ public class Dashboard extends javax.swing.JFrame {
 
         jTabbedPane1.setBackground(new java.awt.Color(255, 255, 255));
 
-        jTable1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -809,6 +1030,8 @@ public class Dashboard extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        jTable1.getTableHeader().setResizingAllowed(false);
+        jTable1.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(jTable1);
 
         jTabbedPane1.addTab("All", jScrollPane1);
@@ -824,6 +1047,9 @@ public class Dashboard extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        jTable2.setRowSelectionAllowed(false);
+        jTable2.getTableHeader().setResizingAllowed(false);
+        jTable2.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(jTable2);
 
         jTabbedPane1.addTab("Withdraw", jScrollPane2);
@@ -1471,6 +1697,77 @@ public class Dashboard extends javax.swing.JFrame {
         jTabbedPane2.setSelectedIndex(4);
     }//GEN-LAST:event_btnHomeActionPerformed
 
+    private void btnConfirmWDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmWDActionPerformed
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+        
+        String amountText = txtAmountWD.getText();
+        if (amountText.trim().isEmpty() || amountText.trim() == "0") {
+            JOptionPane.showMessageDialog(null, "Please enter an amount.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        double amount = Double.parseDouble(txtAmountWD.getText());
+        if (amount <= 100) {
+            JOptionPane.showMessageDialog(null, "The amount must be greater than 100.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String selectedItem = (String) cmbxDepositFrom.getSelectedItem();
+        if (selectedItem == "Select Mode of Transaction..." || selectedItem.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please select an account to withdraw from.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        try {
+            // Example for deposit
+            dbAccess.addTransactionAndUpdateBalance( dbAccess.getAccountNumber(), Login.USERNAME, "Deposit", selectedItem, amount);
+            JOptionPane.showMessageDialog(null, "Transaction successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            txtAmountWD.setText("");
+            cmbxDepositFrom.setSelectedItem("Select Mode of Transaction...");
+        } catch (NumberFormatException e) {
+            // Handle case where amount is not a valid number
+            JOptionPane.showMessageDialog(null, "Invalid amount entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            // Handle SQL exceptions
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred while processing the transaction. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnConfirmWDActionPerformed
+
+    private void btnConfirmWWActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmWWActionPerformed
+
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+        
+        String amountText = txtAmountWW.getText();
+        if (amountText.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please enter an amount.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        double amount = Double.parseDouble(txtAmountWW.getText());
+        String selectedItem = (String) cmbxWithdrawTo.getSelectedItem();
+        if (selectedItem == "Select Mode of Transaction..." || selectedItem.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please select an account to withdraw from.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            // Example for deposit
+            dbAccess.addTransactionAndUpdateBalance( dbAccess.getAccountNumber(), Login.USERNAME, "Withdraw", selectedItem, amount);
+            JOptionPane.showMessageDialog(null, "Transaction successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            txtAmountWW.setText("");
+            cmbxWithdrawTo.setSelectedItem("Select Mode of Transaction...");
+        } catch (NumberFormatException e) {
+            // Handle case where amount is not a valid number
+            JOptionPane.showMessageDialog(null, "Invalid amount entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            // Handle SQL exceptions
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred while processing the transaction. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnConfirmWWActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1519,9 +1816,9 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnProfile;
     private javax.swing.JButton btnSearchH;
     private javax.swing.JButton btnWallet;
-    private javax.swing.JComboBox<String> cmbxDepositTo;
+    private javax.swing.JComboBox<String> cmbxDepositFrom;
     private javax.swing.JComboBox<String> cmbxSortH;
-    private javax.swing.JComboBox<String> cmbxWithdrawFrom;
+    private javax.swing.JComboBox<String> cmbxWithdrawTo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;

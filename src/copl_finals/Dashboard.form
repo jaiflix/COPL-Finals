@@ -801,15 +801,6 @@
                   <SubComponents>
                     <Component class="javax.swing.JTable" name="tblHistory">
                       <Properties>
-                        <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                          <Table columnCount="5" rowCount="2">
-                            <Column editable="true" title="Date" type="java.lang.Object"/>
-                            <Column editable="true" title="Name" type="java.lang.Object"/>
-                            <Column editable="true" title="Email" type="java.lang.Object"/>
-                            <Column editable="true" title="Type of Transaction" type="java.lang.Object"/>
-                            <Column editable="true" title="Amount" type="java.lang.Object"/>
-                          </Table>
-                        </Property>
                         <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                           <TableColumnModel selectionModel="0">
                             <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
@@ -855,9 +846,6 @@
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JTextField" name="txtSearchH">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Search"/>
-                  </Properties>
                 </Component>
                 <Component class="javax.swing.JComboBox" name="cmbxSortH">
                   <Properties>
@@ -982,9 +970,9 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblPicture" min="-2" pref="196" max="-2" attributes="0"/>
                           <Group type="102" attributes="0">
-                              <EmptySpace min="19" pref="19" max="-2" attributes="0"/>
-                              <Component id="jLabel13" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="6" pref="6" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
+                              <Component id="jLabel13" min="-2" pref="20" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="txtFirstName" min="-2" pref="43" max="-2" attributes="0"/>
                               <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
                               <Component id="jLabel14" min="-2" max="-2" attributes="0"/>
@@ -1043,6 +1031,12 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtFirstName">
               <Properties>
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="e0" green="e0" red="e0" type="rgb"/>
+                </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Segoe UI" size="14" style="1"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="jTextField1"/>
               </Properties>
             </Component>
@@ -1056,6 +1050,12 @@
             </Component>
             <Component class="javax.swing.JTextField" name="txtLastName">
               <Properties>
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="e0" green="e0" red="e0" type="rgb"/>
+                </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Segoe UI" size="14" style="1"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="jTextField1"/>
               </Properties>
             </Component>

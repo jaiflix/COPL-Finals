@@ -5,10 +5,13 @@
 package copl_finals;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +28,11 @@ import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
@@ -52,7 +59,9 @@ public class Dashboard extends javax.swing.JFrame {
         applyNumberFilter(txtAmountWT);
         startAutoRefresh();
         setLocationRelativeTo(null);
-
+        txtFirstName.setFocusable(false); // Prevent focus
+        txtLastName.setFocusable(false); // Prevent focus
+      
 
         int initialTabIndex = 4; // Index of the tab you want to show first (0-based index)
         jTabbedPane2.setSelectedIndex(initialTabIndex);
@@ -81,6 +90,25 @@ public class Dashboard extends javax.swing.JFrame {
         configureButton(btnManageSavings, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorManageSavings);
         configureButton(btnHistory, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorHistory);
         configureButton(btnProfile, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorProfile);
+        configureButton(btnLogout, customColor, hoverColor, clickedColor, unclickedColor, lblPicIndicatorHome);
+                // Assuming your search text box is named txtSearch
+        txtSearchH.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterTable();
+            }
+        });
+
     }   
     
         private static void applyNumberFilter(JTextField textField) {
@@ -125,6 +153,30 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }
     
+    private void filterTable() {
+    String searchTerm = txtSearchH.getText().toLowerCase();
+
+    // Create a new table model for filtered data
+    DefaultTableModel model = (DefaultTableModel) tblHistory.getModel();
+    TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+    tblHistory.setRowSorter(sorter);
+
+    // Define the filter for the table
+    RowFilter<DefaultTableModel, Object> rf = new RowFilter<DefaultTableModel, Object>() {
+        @Override
+        public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
+            String date = entry.getStringValue(1).toLowerCase(); // Date column
+            String transacType = entry.getStringValue(2).toLowerCase(); // Transaction column
+            String transacAccount = entry.getStringValue(3).toLowerCase(); // Account column
+            String amount = entry.getStringValue(4).toLowerCase(); // Amount column
+
+            return date.contains(searchTerm) || transacType.contains(searchTerm)
+                    || transacAccount.contains(searchTerm) || amount.contains(searchTerm);
+        }
+    };
+    sorter.setRowFilter(rf);
+}
+    
     private void refreshData() {
         if (Login.USERNAME != null && !Login.USERNAME.isEmpty()) {
             // Create DatabaseAccess instance with the username
@@ -132,10 +184,17 @@ public class Dashboard extends javax.swing.JFrame {
             dbAccess.retrieveUserData();
             lblBalanceD.setText(String.format("%.2f", dbAccess.getBalance()));
             lblBalanceW.setText(String.format("%.2f", dbAccess.getBalance()));
+            String Fname = dbAccess.getFirstName().substring(0, 1).toUpperCase() + dbAccess.getFirstName().substring(1).toLowerCase();
+            String Lname = dbAccess.getLastName().substring(0, 1).toUpperCase() + dbAccess.getLastName().substring(1).toLowerCase();
+            txtFirstName.setText(String.format(Fname));
+            txtLastName.setText(String.format(Lname));
+            lblEmailP.setText(String.format(dbAccess.getEmail()));
+            lblPhoneNumP.setText(String.format(dbAccess.getPhoneNumber()));
             lblAccountNumber.setText(String.format(dbAccess.getAccountNumber()));
             updateTransactionTable();
             updateWithdrawalTable();
             updateDepositTable();
+            updateHistoryTable();
         } else {
             lblBalanceD.setText("Username not set.");
         }
@@ -251,6 +310,35 @@ public class Dashboard extends javax.swing.JFrame {
         // Adjust column widths to fit content
         jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 }
+    private void updateHistoryTable() {
+            DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+            dbAccess.retrieveUserData(); // Retrieve user data including transactions
+
+            List<DatabaseAccess.Transaction> transactions = dbAccess.getTransactions();
+            transactions.sort((t1, t2) -> t2.getTransferDate().compareTo(t1.getTransferDate())); // Sort in descending order
+
+            // Limit to the latest 5 transactions
+            DefaultTableModel model = (DefaultTableModel) tblHistory.getModel();
+            model.setColumnIdentifiers(new Object[] {
+             "No.", "Date", "Transaction", "Account", "Amount"
+             });
+            model.setRowCount(0); // Clear existing rows
+
+            for (int i = 0; i < Math.min(75, transactions.size()); i++) {
+                DatabaseAccess.Transaction txn = transactions.get(i);
+                model.addRow(new Object[] {
+                    i + 1,
+                    txn.getTransferDate(),
+                    txn.getTransacType(),
+                    txn.getTransacAccount(),
+                    txn.getAmount()
+                });
+            }
+            Map<String, Double> totals = calculateTransactionTotals(transactions);
+            displayTransactionTotals(totals);
+            jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            filterTable();
+    }
 
     
     private Map<String, Double> calculateTransactionTotals(List<DatabaseAccess.Transaction> transactions) {
@@ -796,21 +884,10 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel18.setFont(new java.awt.Font("Segoe UI Black", 1, 36)); // NOI18N
         jLabel18.setText("History");
 
-        tblHistory.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Date", "Name", "Email", "Type of Transaction", "Amount"
-            }
-        ));
         jScrollPane4.setViewportView(tblHistory);
 
         jLabel46.setForeground(new java.awt.Color(102, 102, 102));
         jLabel46.setText("All Transaction History");
-
-        txtSearchH.setText("Search");
 
         cmbxSortH.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cmbxSortH.setBorder(null);
@@ -883,11 +960,15 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel13.setText("First Name");
 
+        txtFirstName.setBackground(new java.awt.Color(224, 224, 224));
+        txtFirstName.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         txtFirstName.setText("jTextField1");
 
         jLabel14.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel14.setText("Last Name");
 
+        txtLastName.setBackground(new java.awt.Color(224, 224, 224));
+        txtLastName.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         txtLastName.setText("jTextField1");
 
         btnEditProfile.setBackground(new java.awt.Color(0, 204, 102));
@@ -1004,8 +1085,8 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(lblPicture, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel12Layout.createSequentialGroup()
                         .addGap(19, 19, 19)
-                        .addComponent(jLabel13)
-                        .addGap(6, 6, 6)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
                         .addComponent(jLabel14)
@@ -1725,7 +1806,26 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnWalletActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        // TODO add your handling code here:
+
+        int confirmed = JOptionPane.showConfirmDialog(
+            Dashboard.this, // Parent component
+            "Are you sure you want to logout?",
+            "Logout Confirmation",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirmed == JOptionPane.YES_OPTION) {
+            // Perform logout actions here
+            
+            Login.USERNAME = null;
+            // Close the current window
+            dispose();
+
+            EventQueue.invokeLater(() -> {
+            new Login().setVisible(true);
+        });
+        }
+        // If NO_OPTION, do nothing (the window remains open)
+
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed

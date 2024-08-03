@@ -198,6 +198,11 @@ public class Register extends javax.swing.JFrame {
             
             JOptionPane.showMessageDialog(this, "Signup successful! Your Account Number is: "+accountNumber+"", 
             "Success", JOptionPane.INFORMATION_MESSAGE);
+            SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                new Login().setVisible(true);
+                            }
+                        });
             dispose();
             //new login().setVisible(true);
         } catch (SQLException e) {

@@ -25,6 +25,7 @@ import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
@@ -40,26 +41,16 @@ import javax.swing.text.PlainDocument;
 public class Dashboard extends javax.swing.JFrame {
     
     private JButton lastClickedButton = null;
+    private Timer timer;
+
     
     public Dashboard() {
         initComponents();
+        refreshData();
         applyNumberFilter(txtAmountWD);
         applyNumberFilter(txtAmountWW);
-
-        // Ensure USERNAME is set before using DatabaseAccess
-        if (Login.USERNAME != null && !Login.USERNAME.isEmpty()) {
-            // Create DatabaseAccess instance with the username
-            DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
-            dbAccess.retrieveUserData();
-            lblBalanceD.setText(String.format("%.2f", dbAccess.getBalance()));
-            lblBalanceW.setText(String.format("%.2f", dbAccess.getBalance()));
-            updateTransactionTable();
-            updateWithdrawalTable();
-            updateDepositTable();
-        } else {
-            lblBalanceD.setText("Username not set.");
-        }
-        
+        applyNumberFilter(txtAmountWT);
+        startAutoRefresh();
         setLocationRelativeTo(null);
 
 
@@ -132,6 +123,33 @@ public class Dashboard extends javax.swing.JFrame {
             // Check if the first character is zero
             return text.length() == 0 || text.charAt(0) != '0';
         }
+    }
+    
+    private void refreshData() {
+        if (Login.USERNAME != null && !Login.USERNAME.isEmpty()) {
+            // Create DatabaseAccess instance with the username
+            DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+            dbAccess.retrieveUserData();
+            lblBalanceD.setText(String.format("%.2f", dbAccess.getBalance()));
+            lblBalanceW.setText(String.format("%.2f", dbAccess.getBalance()));
+            lblAccountNumber.setText(String.format(dbAccess.getAccountNumber()));
+            updateTransactionTable();
+            updateWithdrawalTable();
+            updateDepositTable();
+        } else {
+            lblBalanceD.setText("Username not set.");
+        }
+    }
+    
+    private void startAutoRefresh() {
+        // Create a Timer that triggers every 2000 milliseconds (2 seconds)
+        timer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshData();
+            }
+        });
+        timer.start(); // Start the timer
     }
     
     private void updateTransactionTable() {
@@ -344,6 +362,8 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel7 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         lblBalanceW = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        lblAccountNumber = new javax.swing.JLabel();
         jTabbedPane3 = new javax.swing.JTabbedPane();
         pnlDepositW = new javax.swing.JPanel();
         cmbxDepositFrom = new javax.swing.JComboBox<>();
@@ -476,30 +496,44 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel7.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(200, 252, 180), 1, true));
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel5.setText("Your Balance:");
+        jLabel5.setText("Account Number:");
 
-        lblBalanceW.setFont(new java.awt.Font("Segoe UI Black", 1, 48)); // NOI18N
+        lblBalanceW.setFont(new java.awt.Font("Segoe UI Black", 1, 40)); // NOI18N
         lblBalanceW.setText("jLabel16");
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel8.setText("Your Balance:");
+
+        lblAccountNumber.setFont(new java.awt.Font("Segoe UI Black", 1, 40)); // NOI18N
+        lblAccountNumber.setText("jLabel16");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(24, 24, 24)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5)
-                    .addComponent(lblBalanceW, javax.swing.GroupLayout.PREFERRED_SIZE, 419, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(51, Short.MAX_VALUE))
+                    .addComponent(lblBalanceW, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblAccountNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel5)
-                .addGap(27, 27, 27)
-                .addComponent(lblBalanceW)
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addGap(29, 29, 29)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblBalanceW)
+                    .addComponent(lblAccountNumber))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         jTabbedPane3.setBackground(new java.awt.Color(200, 252, 180));
@@ -632,13 +666,14 @@ public class Dashboard extends javax.swing.JFrame {
         btnConfirmWT.setForeground(new java.awt.Color(255, 255, 255));
         btnConfirmWT.setText("Confirm");
         btnConfirmWT.setBorder(null);
-
-        txtAmountWT.setText("jTextField3");
+        btnConfirmWT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmWTActionPerformed(evt);
+            }
+        });
 
         jLabel34.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel34.setText("PHP");
-
-        txtTransferTo.setText("jTextField3");
 
         javax.swing.GroupLayout pnlTransferWLayout = new javax.swing.GroupLayout(pnlTransferW);
         pnlTransferW.setLayout(pnlTransferWLayout);
@@ -704,10 +739,10 @@ public class Dashboard extends javax.swing.JFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel4)
-                    .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTabbedPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 851, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTabbedPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 851, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(1363, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
@@ -734,7 +769,7 @@ public class Dashboard extends javax.swing.JFrame {
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 628, Short.MAX_VALUE)
+            .addGap(0, 617, Short.MAX_VALUE)
             .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel9Layout.createSequentialGroup()
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1129,7 +1164,7 @@ public class Dashboard extends javax.swing.JFrame {
         lblTotalSpent.setText("jLabel30");
 
         jLabel60.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel60.setText("Total Money Spent");
+        jLabel60.setText("Total Money Sent");
 
         javax.swing.GroupLayout jPanel25Layout = new javax.swing.GroupLayout(jPanel25);
         jPanel25.setLayout(jPanel25Layout);
@@ -1768,6 +1803,49 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnConfirmWWActionPerformed
 
+    private void btnConfirmWTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmWTActionPerformed
+       
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+        
+        String amountText = txtAmountWT.getText();
+        if (amountText.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please enter an amount.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        double amount = Double.parseDouble(txtAmountWT.getText());
+        String accountnumber = txtTransferTo.getText();
+        if (accountnumber == "" || accountnumber.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Please Enter Recipient Account Number.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (accountnumber == dbAccess.getAccountNumber()) {
+            JOptionPane.showMessageDialog(null, "Enter Someone's Account Number", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (dbAccess.getBalance() < amount) {
+            JOptionPane.showMessageDialog(null, "Insufficient funds. Please enter a lesser amount.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            // Example for deposit
+            dbAccess.sendMoney( dbAccess.getAccountNumber(), accountnumber, amount);
+            JOptionPane.showMessageDialog(null, "Transaction successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            txtAmountWT.setText("");
+            txtTransferTo.setText("");
+        } catch (NumberFormatException e) {
+            // Handle case where amount is not a valid number
+            JOptionPane.showMessageDialog(null, "Invalid amount entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            // Handle SQL exceptions
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "An error occurred while processing the transaction. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnConfirmWTActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1851,6 +1929,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel62;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel79;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
@@ -1890,6 +1969,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jTextField8;
     private javax.swing.JTextField jTextField9;
+    private javax.swing.JLabel lblAccountNumber;
     private javax.swing.JLabel lblBalanceD;
     private javax.swing.JLabel lblBalanceW;
     private javax.swing.JLabel lblDate1;

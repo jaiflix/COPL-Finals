@@ -144,6 +144,102 @@ public class DatabaseAccess {
             if (conn != null) conn.close();
         }
     }
+       public void sendMoney(String senderAccountNumber, String recipientAccountNumber, double amount) throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmtSenderTransaction = null;
+    PreparedStatement pstmtRecipientTransaction = null;
+    PreparedStatement pstmtUpdateSenderBalance = null;
+    PreparedStatement pstmtUpdateRecipientBalance = null;
+    String recipientUsername = null;
+
+    try {
+        conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        conn.setAutoCommit(false); // Start transaction
+        
+        recipientUsername = getUsernameByAccountNumber(recipientAccountNumber);
+        if (recipientUsername == null) {
+            throw new SQLException("Recipient account number not found.");
+        }
+        
+        // Insert transaction for sender
+        String insertSenderTransactionSQL = "INSERT INTO tb_transaction (accountnumber, username, transac_type, transac_account, amount) VALUES (?, ?, ?, ?, ?)";
+        pstmtSenderTransaction = conn.prepareStatement(insertSenderTransactionSQL);
+        pstmtSenderTransaction.setString(1, senderAccountNumber);
+        pstmtSenderTransaction.setString(2, username);
+        pstmtSenderTransaction.setString(3, "Send");
+        pstmtSenderTransaction.setString(4, recipientAccountNumber);
+        pstmtSenderTransaction.setDouble(5, -amount);
+        pstmtSenderTransaction.executeUpdate();
+
+        // Insert transaction for recipient
+        String insertRecipientTransactionSQL = "INSERT INTO tb_transaction (accountnumber, username, transac_type, transac_account, amount) VALUES (?, ?, ?, ?, ?)";
+        pstmtRecipientTransaction = conn.prepareStatement(insertRecipientTransactionSQL);
+        pstmtRecipientTransaction.setString(1, recipientAccountNumber);
+        pstmtRecipientTransaction.setString(2, recipientUsername); // Assuming the recipient's username is the same as the sender's for now
+        pstmtRecipientTransaction.setString(3, "Receive");
+        pstmtRecipientTransaction.setString(4, senderAccountNumber);
+        pstmtRecipientTransaction.setDouble(5, amount);
+        pstmtRecipientTransaction.executeUpdate();
+
+        // Update sender's balance
+        String updateSenderBalanceSQL = "UPDATE tb_userbalance SET balance = balance - ?, date_modified = ? WHERE accountnumber = ?";
+        pstmtUpdateSenderBalance = conn.prepareStatement(updateSenderBalanceSQL);
+        pstmtUpdateSenderBalance.setDouble(1, amount);
+        pstmtUpdateSenderBalance.setTimestamp(2, new Timestamp(new Date().getTime()));
+        pstmtUpdateSenderBalance.setString(3, senderAccountNumber);
+        pstmtUpdateSenderBalance.executeUpdate();
+
+        // Update recipient's balance
+        String updateRecipientBalanceSQL = "UPDATE tb_userbalance SET balance = balance + ?, date_modified = ? WHERE accountnumber = ?";
+        pstmtUpdateRecipientBalance = conn.prepareStatement(updateRecipientBalanceSQL);
+        pstmtUpdateRecipientBalance.setDouble(1, amount);
+        pstmtUpdateRecipientBalance.setTimestamp(2, new Timestamp(new Date().getTime()));
+        pstmtUpdateRecipientBalance.setString(3, recipientAccountNumber);
+        pstmtUpdateRecipientBalance.executeUpdate();
+
+        conn.commit(); // Commit transaction
+    } catch (SQLException e) {
+        if (conn != null) {
+            try {
+                conn.rollback(); // Rollback transaction on error
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        e.printStackTrace();
+    } finally {
+        if (pstmtSenderTransaction != null) pstmtSenderTransaction.close();
+        if (pstmtRecipientTransaction != null) pstmtRecipientTransaction.close();
+        if (pstmtUpdateSenderBalance != null) pstmtUpdateSenderBalance.close();
+        if (pstmtUpdateRecipientBalance != null) pstmtUpdateRecipientBalance.close();
+        if (conn != null) conn.close();
+    }
+}
+       private String getUsernameByAccountNumber(String accountNumber) throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String username = null;
+
+    try {
+        conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        String query = "SELECT username FROM tb_userbalance WHERE accountnumber = ?";
+        pstmt = conn.prepareStatement(query);
+        pstmt.setString(1, accountNumber);
+        rs = pstmt.executeQuery();
+
+        if (rs.next()) {
+            username = rs.getString("username");
+        }
+    } finally {
+        if (rs != null) rs.close();
+        if (pstmt != null) pstmt.close();
+        if (conn != null) conn.close();
+    }
+
+    return username;
+}
+
 
     // Getters for the variables
     public String getAccountNumber() { return accountNumber; }

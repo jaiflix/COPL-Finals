@@ -35,9 +35,12 @@ public class DatabaseAccess {
     private String nationality;
     private String password;
     private String status;
+    
 
     // List to hold transaction data
     private List<Transaction> transactions = new ArrayList<>();
+    
+    private List<Savings> savingsList = new ArrayList<>();
 
     // Constructor to initialize username
     public DatabaseAccess(String username) {
@@ -94,7 +97,30 @@ public class DatabaseAccess {
                         String transferDate = rs.getString("transfer_date");
 
                         // Add transaction to the list
-                        transactions.add(new Transaction(transactionId, accountNum, transacType,transacAccount, amount, transferDate));
+                        transactions.add(new Transaction(transactionId, accountNum, transacType, transacAccount, amount, transferDate));
+                    }
+                }
+            }
+
+            // Retrieve data from tb_savingsmanagement
+            String savingsQuery = "SELECT savingsid, accountnumber, title, savings_details, savings_password, savings_qty, savings_goal, progress, date_created, last_modified FROM tb_savingsmanagement WHERE accountnumber = ?";
+            try (PreparedStatement savingsStmt = connection.prepareStatement(savingsQuery)) {
+                savingsStmt.setString(1, accountNumber);
+                try (ResultSet rs = savingsStmt.executeQuery()) {
+                    savingsList.clear(); // Clear previous savings
+                    while (rs.next()) {
+                        int savingsId = rs.getInt("savingsid");
+                        String title = rs.getString("title");
+                        String savingsDetails = rs.getString("savings_details");
+                        String savingsPassword = rs.getString("savings_password");
+                        double savingsQty = rs.getDouble("savings_qty");
+                        double savingsGoal = rs.getDouble("savings_goal");
+                        String progress = rs.getString("progress");
+                        String dateCreated = rs.getString("date_created");
+                        String lastModified = rs.getString("last_modified");
+
+                        // Add savings to the list
+                        savingsList.add(new Savings(savingsId, accountNumber, title, savingsDetails, savingsPassword, savingsQty, savingsGoal, progress, dateCreated, lastModified));
                     }
                 }
             }
@@ -103,6 +129,18 @@ public class DatabaseAccess {
             e.printStackTrace();
         }
     }
+
+    
+    public Savings getSavingsByTitle(String title) {
+        for (Savings savings : savingsList) {
+            if (savings.getTitle().equals(title)) {
+                return savings;
+            }
+        }
+        return null; // Return null if no matching savings is found
+    }
+    
+    
     
       public void addTransactionAndUpdateBalance(String accountNumber, String username, String transacType, 
                                                 String transacAccount, double amount) throws SQLException {
@@ -215,6 +253,94 @@ public class DatabaseAccess {
         if (conn != null) conn.close();
     }
 }
+       
+       public void addSavings(String accountNumber, String title, String savingsDetails, String savingsPassword, double savingsQty, double savingsGoal, String progress) throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+
+    try {
+        conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+
+        String insertSQL = "INSERT INTO tb_savingsmanagement (accountnumber, title, savings_details, savings_password, savings_qty, savings_goal, progress) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        pstmt = conn.prepareStatement(insertSQL);
+        pstmt.setString(1, accountNumber);
+        pstmt.setString(2, title);
+        pstmt.setString(3, savingsDetails);
+        pstmt.setString(4, savingsPassword);
+        pstmt.setDouble(5, savingsQty);
+        pstmt.setDouble(6, savingsGoal);
+        pstmt.setString(7, progress);
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e; // Re-throw the exception for handling higher up the call stack if necessary
+    } finally {
+        if (pstmt != null) pstmt.close();
+        if (conn != null) conn.close();
+    }
+}
+       
+       public void updateSavingsQty(String accountNumber, String savingsTitle, double amount, boolean isDeposit) throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmtUpdateSavings = null;
+    PreparedStatement pstmtUpdateBalance = null;
+
+    try {
+        conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        conn.setAutoCommit(false); // Start transaction
+
+        // Retrieve current savings quantity
+        String selectSavingsSQL = "SELECT savings_qty FROM tb_savingsmanagement WHERE accountnumber = ? AND title = ?";
+        try (PreparedStatement pstmtSelectSavings = conn.prepareStatement(selectSavingsSQL)) {
+            pstmtSelectSavings.setString(1, accountNumber);
+            pstmtSelectSavings.setString(2, savingsTitle);
+            try (ResultSet rs = pstmtSelectSavings.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Savings not found.");
+                }
+                double currentSavingsQty = rs.getDouble("savings_qty");
+
+                // Update savings quantity
+                double newSavingsQty = isDeposit ? currentSavingsQty + amount : currentSavingsQty - amount;
+                if (newSavingsQty < 0) {
+                    throw new SQLException("Insufficient savings.");
+                }
+                String updateSavingsSQL = "UPDATE tb_savingsmanagement SET savings_qty = ? WHERE accountnumber = ? AND title = ?";
+                pstmtUpdateSavings = conn.prepareStatement(updateSavingsSQL);
+                pstmtUpdateSavings.setDouble(1, newSavingsQty);
+                pstmtUpdateSavings.setString(2, accountNumber);
+                pstmtUpdateSavings.setString(3, savingsTitle);
+                pstmtUpdateSavings.executeUpdate();
+
+                // Update user balance
+                double amountToUpdate = isDeposit ? -amount : amount;
+                String updateBalanceSQL = "UPDATE tb_userbalance SET balance = balance + ?, date_modified = ? WHERE accountnumber = ?";
+                pstmtUpdateBalance = conn.prepareStatement(updateBalanceSQL);
+                pstmtUpdateBalance.setDouble(1, amountToUpdate);
+                pstmtUpdateBalance.setTimestamp(2, new Timestamp(new Date().getTime()));
+                pstmtUpdateBalance.setString(3, accountNumber);
+                pstmtUpdateBalance.executeUpdate();
+            }
+        }
+
+        conn.commit(); // Commit transaction
+    } catch (SQLException e) {
+        if (conn != null) {
+            try {
+                conn.rollback(); // Rollback transaction on error
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        e.printStackTrace();
+    } finally {
+        if (pstmtUpdateSavings != null) pstmtUpdateSavings.close();
+        if (pstmtUpdateBalance != null) pstmtUpdateBalance.close();
+        if (conn != null) conn.close();
+    }
+}
+
+
        private String getUsernameByAccountNumber(String accountNumber) throws SQLException {
     Connection conn = null;
     PreparedStatement pstmt = null;
@@ -255,6 +381,7 @@ public class DatabaseAccess {
     public String getPassword() { return password; }
     public String getStatus() { return status; }
     public List<Transaction> getTransactions() { return transactions; } // Getter for transactions
+    public List<Savings> getSavingsList() {return savingsList;}
 
     // Transaction class to hold transaction data
     public static class Transaction {
@@ -282,4 +409,47 @@ public class DatabaseAccess {
         public String getAmount() { return amount; }
         public String getTransferDate() { return transferDate; }
     }
+    
+    public static class Savings {
+        private int savingsId;
+        private String accountNumber;
+        private String title;
+        private String savingsDetails;
+        private String savingsPassword;
+        private double savingsQty;
+        private double savingsGoal;
+        private String progress;
+        private String dateCreated;
+        private String lastModified;
+
+        public Savings(int savingsId, String accountNumber, String title, String savingsDetails, String savingsPassword, double savingsQty, double savingsGoal, String progress, String dateCreated, String lastModified) {
+            this.savingsId = savingsId;
+            this.accountNumber = accountNumber;
+            this.title = title;
+            this.savingsDetails = savingsDetails;
+            this.savingsPassword = savingsPassword;
+            this.savingsQty = savingsQty;
+            this.savingsGoal = savingsGoal;
+            this.progress = progress;
+            this.dateCreated = dateCreated;
+            this.lastModified = lastModified;
+        }
+
+        // Getters
+        public int getSavingsId() { return savingsId; }
+        public String getAccountNumber() { return accountNumber; }
+        public String getTitle() { return title; }
+        public String getSavingsDetails() { return savingsDetails; }
+        public String getSavingsPassword() { return savingsPassword; }
+        public double getSavingsQty() { return savingsQty; }
+        public double getSavingsGoal() { return savingsGoal; }
+        public String getProgress() { return progress; }
+        public String getDateCreated() { return dateCreated; }
+        public String getLastModified() { return lastModified; }
+        
+    }
+
+    // Other inner classes and methods ...
 }
+
+

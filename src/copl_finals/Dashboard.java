@@ -32,6 +32,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -52,13 +53,6 @@ public class Dashboard extends javax.swing.JFrame {
     
     private JButton lastClickedButton = null;
     private Timer timer;
-    private String currentProgress;
-    private String currentTitle;
-    private String currentDetails;
-    private String currentDateCreated;
-    private String currentDateModified;
-    private String currentCurrentBalance;
-    private String currentBalanceGoal;
     
     
     public Dashboard() {
@@ -79,16 +73,14 @@ public class Dashboard extends javax.swing.JFrame {
         txtLastName.setBackground(Color.LIGHT_GRAY);
         txtTitleMS.setBackground(Color.LIGHT_GRAY);
         txtSavingsDetails2.setBackground(Color.LIGHT_GRAY);
+        
         DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
         dbAccess.retrieveUserData();
         refreshData2();
-        currentProgress = lblprogress.getText();
-        currentTitle = txtTitleMS.getText();
-        currentDetails = txtSavingsDetails2.getText();
-        currentDateCreated = lblDateCreated.getText();
-        currentDateModified = lblDateModifiedlMS.getText();
-        currentCurrentBalance = lblCurrentBalanceMS.getText();
-        currentBalanceGoal = lblBalanceGoalMS.getText();
+        String Fname = dbAccess.getFirstName().substring(0, 1).toUpperCase() + dbAccess.getFirstName().substring(1).toLowerCase();
+        String Lname = dbAccess.getLastName().substring(0, 1).toUpperCase() + dbAccess.getLastName().substring(1).toLowerCase();
+        txtFirstName.setText(String.format(Fname));
+        txtLastName.setText(String.format(Lname));
         
         cmbxMS.addActionListener(new ActionListener() {
             @Override
@@ -98,23 +90,16 @@ public class Dashboard extends javax.swing.JFrame {
 
                 if (selectedSavings != null) {
                     lblprogress.setText(selectedSavings.getProgress());
-                    txtTitleMS.setText(selectedSavings.getSavingsDetails());
+                    txtTitleMS.setText(selectedSavings.getTitle());
                     txtSavingsDetails2.setText(selectedSavings.getSavingsDetails());
                     lblDateCreated.setText(selectedSavings.getDateCreated());
                     lblDateModifiedlMS.setText(selectedSavings.getLastModified());
                     lblCurrentBalanceMS.setText(Double.toString(selectedSavings.getSavingsQty()));
                     lblBalanceGoalMS.setText(Double.toString(selectedSavings.getSavingsGoal()));
-                } else {
-                    lblprogress.setText(currentProgress);
-                    txtTitleMS.setText(currentTitle);
-                    txtSavingsDetails2.setText(currentDetails);
-                    lblDateCreated.setText(currentDateCreated);
-                    lblDateModifiedlMS.setText(currentDateModified);
-                    lblCurrentBalanceMS.setText(currentCurrentBalance);
-                    lblBalanceGoalMS.setText(currentBalanceGoal);
                 }
                 
-            }
+                    }
+           
         });
         
         ButtonGroup group = new ButtonGroup();
@@ -226,12 +211,19 @@ public class Dashboard extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Insufficient balance to deposit the specified amount.", "Insufficient Balance", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (selectedSavings.getSavingsQty()+amount > selectedSavings.getSavingsGoal()) {
+                JOptionPane.showMessageDialog(this, "Exceeding the limit of Goal, Try again.", "Insufficient Savings", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
         } else {
             if (selectedSavings.getSavingsQty() < amount) {
                 JOptionPane.showMessageDialog(this, "Insufficient savings to withdraw the specified amount.", "Insufficient Savings", JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
+    
+    
     try {
         dbAccess.updateSavingsQty(dbAccess.getAccountNumber(), selectedTitle, amount, isDeposit);
         JOptionPane.showMessageDialog(this, "Savings updated successfully.");
@@ -273,10 +265,7 @@ public class Dashboard extends javax.swing.JFrame {
             dbAccess.retrieveUserData();
             lblBalanceD.setText(String.format("%.2f", dbAccess.getBalance()));
             lblBalanceW.setText(String.format("%.2f", dbAccess.getBalance()));
-            String Fname = dbAccess.getFirstName().substring(0, 1).toUpperCase() + dbAccess.getFirstName().substring(1).toLowerCase();
-            String Lname = dbAccess.getLastName().substring(0, 1).toUpperCase() + dbAccess.getLastName().substring(1).toLowerCase();
-            txtFirstName.setText(String.format(Fname));
-            txtLastName.setText(String.format(Lname));
+
             lblEmailP.setText(String.format(dbAccess.getEmail()));
             lblPhoneNumP.setText(String.format(dbAccess.getPhoneNumber()));
             lblAccountNumber.setText(String.format(dbAccess.getAccountNumber()));
@@ -284,18 +273,6 @@ public class Dashboard extends javax.swing.JFrame {
             updateWithdrawalTable();
             updateDepositTable();
             updateHistoryTable();
-            String selectedTitle = (String) cmbxMS.getSelectedItem();
-                DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
-
-                if (selectedSavings != null) {
-                    lblprogress.setText(selectedSavings.getProgress());
-                    txtTitleMS.setText(selectedSavings.getSavingsDetails());
-                    txtSavingsDetails2.setText(selectedSavings.getSavingsDetails());
-                    lblDateCreated.setText(selectedSavings.getDateCreated());
-                    lblDateModifiedlMS.setText(selectedSavings.getLastModified());
-                    lblCurrentBalanceMS.setText(Double.toString(selectedSavings.getSavingsQty()));
-                    lblBalanceGoalMS.setText(Double.toString(selectedSavings.getSavingsGoal()));
-                } 
         } else {
             lblBalanceD.setText("Username not set.");
         }
@@ -307,13 +284,10 @@ public class Dashboard extends javax.swing.JFrame {
             DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
             dbAccess.retrieveUserData();
             
-            String firstItem = cmbxMS.getItemAt(0);
 
             // Clear all items from the JComboBox
             cmbxMS.removeAllItems();
 
-            // Re-add the first item
-            cmbxMS.addItem(firstItem);
             for (DatabaseAccess.Savings savings : dbAccess.getSavingsList()) {
             cmbxMS.addItem(savings.getTitle());
             }
@@ -618,7 +592,6 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel39 = new javax.swing.JLabel();
         jLabel44 = new javax.swing.JLabel();
         lblDateModifiedlMS = new javax.swing.JLabel();
-        checkEditTitle = new javax.swing.JCheckBox();
         lblCurrentBalanceMS = new javax.swing.JLabel();
         lblBalanceGoalMS = new javax.swing.JLabel();
         jLabel53 = new javax.swing.JLabel();
@@ -627,7 +600,6 @@ public class Dashboard extends javax.swing.JFrame {
         rbtnWithdrawMS = new javax.swing.JRadioButton();
         btnUpdateMS = new javax.swing.JButton();
         btnEnterTransMS = new javax.swing.JButton();
-        checkEditSavingsDetails = new javax.swing.JCheckBox();
         jLabel45 = new javax.swing.JLabel();
         lblDateCreated = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
@@ -659,13 +631,6 @@ public class Dashboard extends javax.swing.JFrame {
         jTextField7 = new javax.swing.JTextField();
         jTextField8 = new javax.swing.JTextField();
         jCheckBox1 = new javax.swing.JCheckBox();
-        jCheckBox3 = new javax.swing.JCheckBox();
-        txtOldPassP = new javax.swing.JTextField();
-        jLabel24 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
-        txtNewPassP = new javax.swing.JTextField();
-        jLabel27 = new javax.swing.JLabel();
-        txtConfirmPassP = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
@@ -1010,7 +975,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(jLabel4)
                     .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jTabbedPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(1327, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1028,13 +993,13 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 880, Short.MAX_VALUE)
+            .addGap(0, 2171, Short.MAX_VALUE)
             .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 617, Short.MAX_VALUE)
+            .addGap(0, 628, Short.MAX_VALUE)
             .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel9Layout.createSequentialGroup()
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1058,7 +1023,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        cmbxMS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Savings List" }));
         cmbxMS.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbxMSActionPerformed(evt);
@@ -1090,13 +1054,6 @@ public class Dashboard extends javax.swing.JFrame {
         lblDateModifiedlMS.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblDateModifiedlMS.setText("Date");
 
-        checkEditTitle.setText("Edit Title");
-        checkEditTitle.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                checkEditTitleActionPerformed(evt);
-            }
-        });
-
         lblCurrentBalanceMS.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblCurrentBalanceMS.setText("Balance");
 
@@ -1124,6 +1081,11 @@ public class Dashboard extends javax.swing.JFrame {
         btnUpdateMS.setBackground(new java.awt.Color(8, 124, 28));
         btnUpdateMS.setForeground(new java.awt.Color(255, 255, 255));
         btnUpdateMS.setText("Update");
+        btnUpdateMS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateMSActionPerformed(evt);
+            }
+        });
 
         btnEnterTransMS.setBackground(new java.awt.Color(8, 124, 28));
         btnEnterTransMS.setForeground(new java.awt.Color(255, 255, 255));
@@ -1131,13 +1093,6 @@ public class Dashboard extends javax.swing.JFrame {
         btnEnterTransMS.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEnterTransMSActionPerformed(evt);
-            }
-        });
-
-        checkEditSavingsDetails.setText("Edit Savings Details");
-        checkEditSavingsDetails.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                checkEditSavingsDetailsActionPerformed(evt);
             }
         });
 
@@ -1211,15 +1166,9 @@ public class Dashboard extends javax.swing.JFrame {
                                     .addComponent(lblBalanceGoalMS, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGap(0, 0, Short.MAX_VALUE))
                                 .addComponent(jScrollPane5))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel14Layout.createSequentialGroup()
-                                    .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(checkEditSavingsDetails)
-                                        .addComponent(checkEditTitle))
-                                    .addGap(3, 3, 3))
-                                .addComponent(btnUpdateMS, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(34, Short.MAX_VALUE))
+                            .addGap(11, 11, 11)
+                            .addComponent(btnUpdateMS, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(1325, Short.MAX_VALUE))
         );
         jPanel14Layout.setVerticalGroup(
             jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1231,8 +1180,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel33)
-                    .addComponent(txtTitleMS, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkEditTitle))
+                    .addComponent(txtTitleMS, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel14Layout.createSequentialGroup()
@@ -1242,8 +1190,6 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane5)
                             .addGroup(jPanel14Layout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(checkEditSavingsDetails)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(btnUpdateMS, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(27, 27, 27)))
@@ -1287,7 +1233,7 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnAddSavingsMS, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 337, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1632, Short.MAX_VALUE)
                         .addComponent(cmbxMS, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -1302,7 +1248,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(btnAddSavingsMS, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, 434, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
@@ -1346,7 +1292,7 @@ public class Dashboard extends javax.swing.JFrame {
             .addGroup(jPanel18Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 868, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 2159, Short.MAX_VALUE)
                     .addGroup(jPanel18Layout.createSequentialGroup()
                         .addGroup(jPanel18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel18)
@@ -1463,44 +1409,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        jCheckBox3.setBackground(new java.awt.Color(255, 255, 255));
-        jCheckBox3.setText("Edit Password");
-        jCheckBox3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox3ActionPerformed(evt);
-            }
-        });
-
-        txtOldPassP.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        txtOldPassP.setText("jTextField1");
-        txtOldPassP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtOldPassPActionPerformed(evt);
-            }
-        });
-
-        jLabel24.setText("Old Password");
-
-        jLabel25.setText("New Password");
-
-        txtNewPassP.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        txtNewPassP.setText("jTextField1");
-        txtNewPassP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtNewPassPActionPerformed(evt);
-            }
-        });
-
-        jLabel27.setText("Confirm Password");
-
-        txtConfirmPassP.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        txtConfirmPassP.setText("jTextField1");
-        txtConfirmPassP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtConfirmPassPActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
         jPanel12Layout.setHorizontalGroup(
@@ -1542,23 +1450,8 @@ public class Dashboard extends javax.swing.JFrame {
                             .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 811, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                 .addComponent(btnEditProfile, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(jPanel12Layout.createSequentialGroup()
-                                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(txtOldPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel24))
-                                        .addGap(18, 18, 18)
-                                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addComponent(txtNewPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel25, javax.swing.GroupLayout.Alignment.LEADING))
-                                        .addGap(18, 18, 18)
-                                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addComponent(txtConfirmPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel27, javax.swing.GroupLayout.Alignment.LEADING))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jCheckBox3))
-                                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 811, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addContainerGap(63, Short.MAX_VALUE))
+                                .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 811, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(1354, Short.MAX_VALUE))
                     .addGroup(jPanel12Layout.createSequentialGroup()
                         .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 811, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))))
@@ -1581,8 +1474,8 @@ public class Dashboard extends javax.swing.JFrame {
                         .addGap(30, 30, 30))
                     .addGroup(jPanel12Layout.createSequentialGroup()
                         .addComponent(lblPicture, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
                 .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel22)
@@ -1600,23 +1493,7 @@ public class Dashboard extends javax.swing.JFrame {
                     .addComponent(lblPhoneNumP))
                 .addGap(12, 12, 12)
                 .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel12Layout.createSequentialGroup()
-                        .addComponent(jLabel25)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtNewPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel12Layout.createSequentialGroup()
-                        .addComponent(jLabel24)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtOldPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel12Layout.createSequentialGroup()
-                        .addComponent(jLabel27)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtConfirmPassP, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBox3))))
-                .addGap(30, 30, 30)
+                .addGap(113, 113, 113)
                 .addComponent(btnEditProfile, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(23, 23, 23))
         );
@@ -2179,7 +2056,7 @@ public class Dashboard extends javax.swing.JFrame {
                                     .addComponent(jLabel10)
                                     .addComponent(txtSavingsPass, javax.swing.GroupLayout.PREFERRED_SIZE, 364, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel15))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1375, Short.MAX_VALUE)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtStartingMoney, javax.swing.GroupLayout.PREFERRED_SIZE, 364, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel17)
@@ -2221,7 +2098,7 @@ public class Dashboard extends javax.swing.JFrame {
                 .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26)
                 .addComponent(btnCreateSavings, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         jTabbedPane2.addTab("tab6", jPanel1);
@@ -2400,8 +2277,35 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_rbPmoneyWActionPerformed
 
     private void btnEditProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditProfileActionPerformed
-        jTabbedPane2.setSelectedIndex(1);
+        jTabbedPane2.setSelectedIndex(3);
         refreshData2();
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+    dbAccess.retrieveUserData();
+
+    if (jCheckBox1.isSelected()) {
+        try {
+                        String newFirstName = txtFirstName.getText();
+                        String newLastName = txtLastName.getText();
+                        dbAccess.updateUserDetails(dbAccess.getAccountNumber(), newFirstName, newLastName);
+                        JOptionPane.showMessageDialog(this, 
+                                "User details updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        dbAccess.retrieveUserData();
+                        txtFirstName.setText(dbAccess.getFirstName());
+                        txtLastName.setText(dbAccess.getLastName());
+                        
+                        // Set fields to non-editable state
+                        txtFirstName.setFocusable(false);
+                        txtLastName.setFocusable(false);
+                        txtFirstName.setBackground(Color.LIGHT_GRAY);
+                        txtLastName.setBackground(Color.LIGHT_GRAY);
+                        jCheckBox1.setSelected(false);
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null, 
+                                "Error updating user details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+    } else {
+        JOptionPane.showMessageDialog(null, "Please select the fields to edit.", "Warning", JOptionPane.WARNING_MESSAGE);
+    }
     }//GEN-LAST:event_btnEditProfileActionPerformed
 
     private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
@@ -2579,40 +2483,27 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnConfirmWTActionPerformed
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        // TODO add your handling code here:
+        if (jCheckBox1.isSelected()) {
+            txtFirstName.setFocusable(true);
+            txtFirstName.setBackground(Color.WHITE);
+            txtLastName.setFocusable(true);
+            txtLastName.setBackground(Color.WHITE);
+        return;
+        } else {
+            txtFirstName.setFocusable(false);
+            txtFirstName.setBackground(Color.LIGHT_GRAY);
+            txtLastName.setFocusable(false);
+            txtLastName.setBackground(Color.LIGHT_GRAY);
+        }
     }//GEN-LAST:event_jCheckBox1ActionPerformed
-
-    private void jCheckBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox3ActionPerformed
-
-    private void txtOldPassPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOldPassPActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtOldPassPActionPerformed
-
-    private void txtNewPassPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNewPassPActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtNewPassPActionPerformed
-
-    private void txtConfirmPassPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtConfirmPassPActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtConfirmPassPActionPerformed
 
     private void txtSavingsPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSavingsPassActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSavingsPassActionPerformed
 
-    private void checkEditTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkEditTitleActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_checkEditTitleActionPerformed
-
     private void rbtnWithdrawMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnWithdrawMSActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_rbtnWithdrawMSActionPerformed
-
-    private void checkEditSavingsDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkEditSavingsDetailsActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_checkEditSavingsDetailsActionPerformed
 
     private void btnAddSavingsMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddSavingsMSActionPerformed
         jTabbedPane2.setSelectedIndex(5);        // TODO add your handling code here:
@@ -2698,11 +2589,29 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void btnEnterTransMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterTransMSActionPerformed
         updateSavingsQty();
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+                String selectedTitle = (String) cmbxMS.getSelectedItem();
+                DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
+
+                if (selectedSavings != null) {
+                    lblprogress.setText(selectedSavings.getProgress());
+                    txtTitleMS.setText(selectedSavings.getSavingsDetails());
+                    txtSavingsDetails2.setText(selectedSavings.getSavingsDetails());
+                    lblDateCreated.setText(selectedSavings.getDateCreated());
+                    lblDateModifiedlMS.setText(selectedSavings.getLastModified());
+                    lblCurrentBalanceMS.setText(Double.toString(selectedSavings.getSavingsQty()));
+                    lblBalanceGoalMS.setText(Double.toString(selectedSavings.getSavingsGoal()));
+                }
     }//GEN-LAST:event_btnEnterTransMSActionPerformed
 
     private void cmbxMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbxMSActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_cmbxMSActionPerformed
+
+    private void btnUpdateMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateMSActionPerformed
+        
+    }//GEN-LAST:event_btnUpdateMSActionPerformed
 
     /**
      * @param args the command line arguments
@@ -2756,13 +2665,10 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnUpdateMS;
     private javax.swing.JButton btnWallet;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JCheckBox checkEditSavingsDetails;
-    private javax.swing.JCheckBox checkEditTitle;
     private javax.swing.JComboBox<String> cmbxDepositFrom;
     private javax.swing.JComboBox<String> cmbxMS;
     private javax.swing.JComboBox<String> cmbxWithdrawTo;
     private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -2779,10 +2685,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
@@ -2903,11 +2806,8 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTextField txtAmountWT;
     private javax.swing.JTextField txtAmountWW;
     private javax.swing.JTextField txtBalanceGoal;
-    private javax.swing.JTextField txtConfirmPassP;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtLastName;
-    private javax.swing.JTextField txtNewPassP;
-    private javax.swing.JTextField txtOldPassP;
     private javax.swing.JTextArea txtSavingsDetails;
     private javax.swing.JTextArea txtSavingsDetails2;
     private javax.swing.JTextField txtSavingsPass;

@@ -540,7 +540,11 @@ private void myinitComponents() {
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        // TODO add your handling code here:
+        if (jCheckBox1.isSelected()) {
+        jPasswordField2.setEchoChar((char) 0); // Show password
+    } else {
+        jPasswordField2.setEchoChar('*'); // Hide password
+    }
     }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     private void login() throws SQLException{

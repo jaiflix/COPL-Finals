@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package copl_finals;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,10 +14,11 @@ import java.util.ArrayList;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import javax.swing.Timer;
 
 
 public class DatabaseAccess {
-    // Database URL, username, and password
+    private Timer timer;
     private static final String DB_URL = "jdbc:mysql://localhost:3306/copl_finals"; // Replace with your database URL
     private static final String DB_USER = "root"; // Replace with your database username
     private static final String DB_PASSWORD = "pass0403"; // Replace with your database password
@@ -46,7 +49,7 @@ public class DatabaseAccess {
     public DatabaseAccess(String username) {
         this.username = username;
     }
-
+    
     // Public method to retrieve user data and populate variables
     public void retrieveUserData() {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -129,6 +132,19 @@ public class DatabaseAccess {
             e.printStackTrace();
         }
     }
+    
+   public void updateUserDetails(String accountNumber, String newFirstName, String newLastName) throws SQLException {
+    String sql = "UPDATE tb_userdetails SET firstname = ?, lastname = ? WHERE accountnumber = ?";
+    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, newFirstName);
+        pstmt.setString(2, newLastName);
+        pstmt.setString(3, accountNumber);
+        pstmt.executeUpdate();
+    }
+}
+
+
 
     
     public Savings getSavingsByTitle(String title) {
@@ -289,8 +305,8 @@ public class DatabaseAccess {
         conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
         conn.setAutoCommit(false); // Start transaction
 
-        // Retrieve current savings quantity
-        String selectSavingsSQL = "SELECT savings_qty FROM tb_savingsmanagement WHERE accountnumber = ? AND title = ?";
+        // Retrieve current savings quantity and goal
+        String selectSavingsSQL = "SELECT savings_qty, savings_goal FROM tb_savingsmanagement WHERE accountnumber = ? AND title = ?";
         try (PreparedStatement pstmtSelectSavings = conn.prepareStatement(selectSavingsSQL)) {
             pstmtSelectSavings.setString(1, accountNumber);
             pstmtSelectSavings.setString(2, savingsTitle);
@@ -299,17 +315,24 @@ public class DatabaseAccess {
                     throw new SQLException("Savings not found.");
                 }
                 double currentSavingsQty = rs.getDouble("savings_qty");
+                double goal = rs.getDouble("savings_goal");
 
                 // Update savings quantity
                 double newSavingsQty = isDeposit ? currentSavingsQty + amount : currentSavingsQty - amount;
                 if (newSavingsQty < 0) {
                     throw new SQLException("Insufficient savings.");
                 }
-                String updateSavingsSQL = "UPDATE tb_savingsmanagement SET savings_qty = ? WHERE accountnumber = ? AND title = ?";
+
+                // Check if the goal has been reached
+                String progress = newSavingsQty >= goal ? "completed" : "in progress";
+
+                String updateSavingsSQL = "UPDATE tb_savingsmanagement SET savings_qty = ?, last_modified = ?, progress = ? WHERE accountnumber = ? AND title = ?";
                 pstmtUpdateSavings = conn.prepareStatement(updateSavingsSQL);
                 pstmtUpdateSavings.setDouble(1, newSavingsQty);
-                pstmtUpdateSavings.setString(2, accountNumber);
-                pstmtUpdateSavings.setString(3, savingsTitle);
+                pstmtUpdateSavings.setTimestamp(2, new Timestamp(new Date().getTime()));
+                pstmtUpdateSavings.setString(3, progress);
+                pstmtUpdateSavings.setString(4, accountNumber);
+                pstmtUpdateSavings.setString(5, savingsTitle);
                 pstmtUpdateSavings.executeUpdate();
 
                 // Update user balance
@@ -339,6 +362,7 @@ public class DatabaseAccess {
         if (conn != null) conn.close();
     }
 }
+
 
 
        private String getUsernameByAccountNumber(String accountNumber) throws SQLException {

@@ -63,6 +63,7 @@ public class Dashboard extends javax.swing.JFrame {
         applyNumberFilter(txtAmountWT);
         applyNumberFilter(txtStartingMoney);
         applyNumberFilter(txtBalanceGoal);
+        applyNumberFilter(txtTransactionMS);
         startAutoRefresh();
         setLocationRelativeTo(null);
         txtFirstName.setFocusable(false); // Prevent focus
@@ -598,7 +599,6 @@ public class Dashboard extends javax.swing.JFrame {
         txtTransactionMS = new javax.swing.JTextField();
         rbtnDepositMS = new javax.swing.JRadioButton();
         rbtnWithdrawMS = new javax.swing.JRadioButton();
-        btnUpdateMS = new javax.swing.JButton();
         btnEnterTransMS = new javax.swing.JButton();
         jLabel45 = new javax.swing.JLabel();
         lblDateCreated = new javax.swing.JLabel();
@@ -606,6 +606,7 @@ public class Dashboard extends javax.swing.JFrame {
         lblprogress = new javax.swing.JLabel();
         jScrollPane5 = new javax.swing.JScrollPane();
         txtSavingsDetails2 = new javax.swing.JTextArea();
+        btnDeleteSavings = new javax.swing.JButton();
         jPanel11 = new javax.swing.JPanel();
         jPanel18 = new javax.swing.JPanel();
         jLabel18 = new javax.swing.JLabel();
@@ -777,7 +778,7 @@ public class Dashboard extends javax.swing.JFrame {
         pnlDepositW.add(cmbxDepositFrom, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 42, 812, 47));
 
         jLabel40.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel40.setText("Deposit to:");
+        jLabel40.setText("Deposit from:");
         pnlDepositW.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
 
         rbPmoneyD.setBackground(new java.awt.Color(200, 252, 180));
@@ -1078,15 +1079,6 @@ public class Dashboard extends javax.swing.JFrame {
             }
         });
 
-        btnUpdateMS.setBackground(new java.awt.Color(8, 124, 28));
-        btnUpdateMS.setForeground(new java.awt.Color(255, 255, 255));
-        btnUpdateMS.setText("Update");
-        btnUpdateMS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateMSActionPerformed(evt);
-            }
-        });
-
         btnEnterTransMS.setBackground(new java.awt.Color(8, 124, 28));
         btnEnterTransMS.setForeground(new java.awt.Color(255, 255, 255));
         btnEnterTransMS.setText("Enter");
@@ -1110,6 +1102,15 @@ public class Dashboard extends javax.swing.JFrame {
         txtSavingsDetails2.setRows(5);
         txtSavingsDetails2.setText("Please Select a Saving");
         jScrollPane5.setViewportView(txtSavingsDetails2);
+
+        btnDeleteSavings.setBackground(new java.awt.Color(204, 0, 0));
+        btnDeleteSavings.setForeground(new java.awt.Color(255, 255, 255));
+        btnDeleteSavings.setText("Delete");
+        btnDeleteSavings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteSavingsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
         jPanel14.setLayout(jPanel14Layout);
@@ -1166,8 +1167,9 @@ public class Dashboard extends javax.swing.JFrame {
                                     .addComponent(lblBalanceGoalMS, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGap(0, 0, Short.MAX_VALUE))
                                 .addComponent(jScrollPane5))
-                            .addGap(11, 11, 11)
-                            .addComponent(btnUpdateMS, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(btnDeleteSavings, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(5, 5, 5))))
                 .addContainerGap(1325, Short.MAX_VALUE))
         );
         jPanel14Layout.setVerticalGroup(
@@ -1180,18 +1182,15 @@ public class Dashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel33)
-                    .addComponent(txtTitleMS, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(36, 36, 36)
+                    .addComponent(txtTitleMS, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnDeleteSavings, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(35, 35, 35)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel14Layout.createSequentialGroup()
                         .addComponent(jLabel37, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(110, 110, 110))
                     .addGroup(jPanel14Layout.createSequentialGroup()
-                        .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane5)
-                            .addGroup(jPanel14Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnUpdateMS, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane5)
                         .addGap(27, 27, 27)))
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel36)
@@ -1352,7 +1351,7 @@ public class Dashboard extends javax.swing.JFrame {
         btnEditProfile.setBackground(new java.awt.Color(0, 204, 102));
         btnEditProfile.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnEditProfile.setForeground(new java.awt.Color(255, 255, 255));
-        btnEditProfile.setText("Edit Profile");
+        btnEditProfile.setText("Save Profile");
         btnEditProfile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEditProfileActionPerformed(evt);
@@ -1600,7 +1599,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel58.setText("Total Withdrawal");
 
         lblTotalWithdrawal.setFont(new java.awt.Font("Segoe UI Black", 1, 30)); // NOI18N
-        lblTotalWithdrawal.setText("jLabel30");
+        lblTotalWithdrawal.setText("0.00");
 
         javax.swing.GroupLayout jPanel32Layout = new javax.swing.GroupLayout(jPanel32);
         jPanel32.setLayout(jPanel32Layout);
@@ -1627,7 +1626,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel25.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(200, 252, 180), 1, true));
 
         lblTotalSpent.setFont(new java.awt.Font("Segoe UI Black", 1, 30)); // NOI18N
-        lblTotalSpent.setText("jLabel30");
+        lblTotalSpent.setText("0.00");
 
         jLabel60.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel60.setText("Total Money Sent");
@@ -1657,7 +1656,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel40.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(200, 252, 180), 1, true));
 
         lblTotalDeposit.setFont(new java.awt.Font("Segoe UI Black", 1, 30)); // NOI18N
-        lblTotalDeposit.setText("jLabel30");
+        lblTotalDeposit.setText("0.00");
 
         jLabel61.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel61.setText("Total Deposit");
@@ -1687,7 +1686,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel42.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(200, 252, 180), 1, true));
 
         lblTotalReceived.setFont(new java.awt.Font("Segoe UI Black", 1, 30)); // NOI18N
-        lblTotalReceived.setText("jLabel30");
+        lblTotalReceived.setText("0.00");
 
         jLabel62.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel62.setText("Total Money Received");
@@ -1799,7 +1798,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel24.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblDate1.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
-        lblDate1.setText("September");
+        lblDate1.setText("July");
         jPanel24.add(lblDate1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 140, -1));
 
         jPanel5.setBackground(new java.awt.Color(0, 204, 51));
@@ -1809,7 +1808,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel2.setText("Savings:");
 
         lblSavingsAug.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        lblSavingsAug.setText("jLabel6");
+        lblSavingsAug.setText("0.00");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -1838,7 +1837,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel6.setText("Spendings:");
 
         lblSpendingsAug.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        lblSpendingsAug.setText("jLabel6");
+        lblSpendingsAug.setText("0.00");
 
         javax.swing.GroupLayout jPanel20Layout = new javax.swing.GroupLayout(jPanel20);
         jPanel20.setLayout(jPanel20Layout);
@@ -1866,7 +1865,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel26.setText("Savings:");
 
         lblSavingsSept.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        lblSavingsSept.setText("jLabel6");
+        lblSavingsSept.setText("0.00");
 
         javax.swing.GroupLayout jPanel21Layout = new javax.swing.GroupLayout(jPanel21);
         jPanel21.setLayout(jPanel21Layout);
@@ -1889,7 +1888,7 @@ public class Dashboard extends javax.swing.JFrame {
         jPanel24.add(jPanel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 220, 280, 40));
 
         lblDate2.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
-        lblDate2.setText("August");
+        lblDate2.setText("June");
         jPanel24.add(lblDate2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         jPanel22.setBackground(new java.awt.Color(255, 51, 0));
@@ -1899,7 +1898,7 @@ public class Dashboard extends javax.swing.JFrame {
         jLabel30.setText("Spendings:");
 
         lblSpendingsSept.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        lblSpendingsSept.setText("jLabel6");
+        lblSpendingsSept.setText("0.00");
 
         javax.swing.GroupLayout jPanel22Layout = new javax.swing.GroupLayout(jPanel22);
         jPanel22.setLayout(jPanel22Layout);
@@ -2418,6 +2417,10 @@ public class Dashboard extends javax.swing.JFrame {
         }
         
         double amount = Double.parseDouble(txtAmountWW.getText());
+        if (dbAccess.getBalance() < amount) {
+            JOptionPane.showMessageDialog(null, "Insufficient funds. Please enter a lesser amount.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         String selectedItem = (String) cmbxWithdrawTo.getSelectedItem();
         if (selectedItem == "Select Mode of Transaction..." || selectedItem.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please select an account to withdraw from.", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -2511,12 +2514,26 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void btnCreateSavings1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateSavings1ActionPerformed
         jTabbedPane2.setSelectedIndex(1);
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+        String selectedTitle = (String) cmbxMS.getSelectedItem();
+            DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
+            
+            refreshData2();
+            Login.prev = "dispose";
+            this.dispose();
+            java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Dashboard().setVisible(true);
+                jTabbedPane2.setSelectedIndex(1);
+            }
+             });
+            jTabbedPane2.setSelectedIndex(1);
     }//GEN-LAST:event_btnCreateSavings1ActionPerformed
 
     private void btnCreateSavingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateSavingsActionPerformed
         DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
         dbAccess.retrieveUserData();
-        
         String titleText = txtTitleCS.getText();
         if (titleText.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please enter a title for your savings", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -2524,11 +2541,12 @@ public class Dashboard extends javax.swing.JFrame {
         }
         
         for (DatabaseAccess.Savings savings : dbAccess.getSavingsList()) {
-            if (titleText.trim() == savings.getTitle()) {
-                JOptionPane.showMessageDialog(null, "Please enter a title for your savings", "Warning", JOptionPane.WARNING_MESSAGE);
+            if (titleText.trim().equals(savings.getTitle())) {
+                JOptionPane.showMessageDialog(null, "Please enter another title for your savings", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
         }
+
 
         String goal = txtBalanceGoal.getText();
         if (goal.trim().isEmpty() || goal.trim() == "0" || goal.trim() == "0." || goal.trim() == "0.0" || goal.trim() == "0.00") {
@@ -2561,6 +2579,7 @@ public class Dashboard extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Insufficient funds. Please enter a lesser starting amount.", "Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
+       
         
         String progress = "In progress";
         try {
@@ -2573,6 +2592,7 @@ public class Dashboard extends javax.swing.JFrame {
             txtBalanceGoal.setText("");
             txtSavingsPass.setText("");
             refreshData2();
+            
         } catch (NumberFormatException e) {
             // Handle case where amount is not a valid number
             JOptionPane.showMessageDialog(null, "Invalid amount entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -2584,19 +2604,29 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCreateSavingsActionPerformed
 
     private void txtTransactionMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTransactionMSActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtTransactionMSActionPerformed
 
     private void btnEnterTransMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterTransMSActionPerformed
-        updateSavingsQty();
         DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
         dbAccess.retrieveUserData();
-                String selectedTitle = (String) cmbxMS.getSelectedItem();
-                DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
-
+        String selectedTitle = (String) cmbxMS.getSelectedItem();
+        DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
+        
+        String transac = txtTransactionMS.getText();
+        if (transac.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Enter an amount first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (selectedSavings == null) {
+            JOptionPane.showMessageDialog(null, "Select a Saving first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        updateSavingsQty();
+                
                 if (selectedSavings != null) {
                     lblprogress.setText(selectedSavings.getProgress());
-                    txtTitleMS.setText(selectedSavings.getSavingsDetails());
+                    txtTitleMS.setText(selectedSavings.getTitle());
                     txtSavingsDetails2.setText(selectedSavings.getSavingsDetails());
                     lblDateCreated.setText(selectedSavings.getDateCreated());
                     lblDateModifiedlMS.setText(selectedSavings.getLastModified());
@@ -2609,9 +2639,39 @@ public class Dashboard extends javax.swing.JFrame {
         
     }//GEN-LAST:event_cmbxMSActionPerformed
 
-    private void btnUpdateMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateMSActionPerformed
+    private void btnDeleteSavingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteSavingsActionPerformed
+
+        DatabaseAccess dbAccess = new DatabaseAccess(Login.USERNAME);
+        dbAccess.retrieveUserData();
+        String selectedTitle = (String) cmbxMS.getSelectedItem();
+        DatabaseAccess.Savings selectedSavings = dbAccess.getSavingsByTitle(selectedTitle);
         
-    }//GEN-LAST:event_btnUpdateMSActionPerformed
+        if (selectedSavings == null) {
+            return;
+        }
+        try {
+            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this savings entry?", "Confirmation", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+            dbAccess.refund(dbAccess.getAccountNumber(), selectedSavings.getSavingsQty());
+            dbAccess.deleteSavings(dbAccess.getAccountNumber(), selectedTitle);
+            JOptionPane.showMessageDialog(null, "Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            jTabbedPane2.setSelectedIndex(1);
+            refreshData2();
+            Login.prev = "dispose";
+            this.dispose();
+            java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Dashboard().setVisible(true);
+            }
+             });
+            }
+        } catch (SQLException e) {
+            // Handle case where amount is not a valid number
+            JOptionPane.showMessageDialog(null, "There is an error occured.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+                
+    }//GEN-LAST:event_btnDeleteSavingsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -2655,6 +2715,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnConfirmWW;
     private javax.swing.JButton btnCreateSavings;
     private javax.swing.JButton btnCreateSavings1;
+    private javax.swing.JButton btnDeleteSavings;
     private javax.swing.JButton btnEditProfile;
     private javax.swing.JButton btnEnterTransMS;
     private javax.swing.JButton btnHistory;
@@ -2662,7 +2723,6 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManageSavings;
     private javax.swing.JButton btnProfile;
-    private javax.swing.JButton btnUpdateMS;
     private javax.swing.JButton btnWallet;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cmbxDepositFrom;

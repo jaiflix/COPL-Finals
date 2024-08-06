@@ -31,7 +31,8 @@ import java.util.logging.Logger;
  * @author Admin
  */
 public class Login extends javax.swing.JFrame {
-    static String USERNAME;    
+    static String USERNAME;   
+    static String prev;  
     static class RoundedTextField extends JTextField {
         private final int radius;
 

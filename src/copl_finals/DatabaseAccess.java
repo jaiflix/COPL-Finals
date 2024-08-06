@@ -143,10 +143,41 @@ public class DatabaseAccess {
         pstmt.executeUpdate();
     }
 }
+   
+   public void deleteSavings(String accountNumber, String title) throws SQLException {
+    String sql = "DELETE FROM tb_savingsmanagement WHERE accountnumber = ? AND title = ?";
+    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setString(1, accountNumber);
+        pstmt.setString(2, title);
+        int affectedRows = pstmt.executeUpdate();
+        if (affectedRows == 0) {
+            throw new SQLException("No rows affected, deletion might have failed.");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e;
+    }
+}
+   
+   public void refund(String accountNumber, double balance) throws SQLException {
+    String sql = "UPDATE tb_userbalance SET balance = balance + ?, date_modified = ? "
+                    + "WHERE accountnumber = ?";
+    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setDouble(1, balance);
+        pstmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+        pstmt.setString(3, accountNumber);
+        int affectedRows = pstmt.executeUpdate();
+        if (affectedRows == 0) {
+            throw new SQLException("No rows affected, deletion might have failed.");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e;
+    }
+}
 
-
-
-    
     public Savings getSavingsByTitle(String title) {
         for (Savings savings : savingsList) {
             if (savings.getTitle().equals(title)) {
